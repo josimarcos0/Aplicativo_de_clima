@@ -1,53 +1,90 @@
 <!DOCTYPE html>
-<html lang="Pt-br">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplicativo de clima</title>
+    <title>Aplicativo de Clima</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="card">
         <div class="search">
-            <input type=" text" placeholder="Escreva uma cidade" spellcheck="false">
-            <button><img src="images/search.png" ></button>
+            <input type="text" placeholder="Escreva uma cidade" spellcheck="false">
+            <button><img src="images/search.png" alt="Ícone de busca"></button>
         </div>
         <div class="weather">
-            <img src="images/rain.png" class="weanther-icon">
-             <h1 class="temp">22°c</h1>
-             <h2 class="city">New york</h2>
+            <img src="images/rain.png" class="weather-icon" alt="Ícone de clima">
+            <h1 class="temp">22°C</h1>
+            <h2 class="city">New York</h2>
             <div class="details">
-                 <div class="col">
-                    <img src="images/humidity.png">
+                <div class="col">
+                    <img src="images/humidity.png" alt="Ícone de umidade">
                     <div>
-                         <p class="humidity">50%</p>
-                         <p>humidity</p>
+                        <p class="humidity">50%</p>
+                        <p>Umidade</p>
                     </div>
-                 </div>
-                 <div class="col">
-                    <img src="images/wind.png">
+                </div>
+                <div class="col">
+                    <img src="images/wind.png" alt="Ícone de vento">
                     <div>
-                         <p class="wind">15 km/h</p>
-                         <p>wind speed</p>
+                        <p class="wind">15 km/h</p>
+                        <p>Velocidade do Vento</p>
                     </div>
-                 </div>
+                </div>
             </div>
         </div>
     </div>
     <script>
         const apiKey = "538148733328bcc94cecc494e92217dc";
-        const apiUrl = `https://api.openweathermap.org/data/2.5/weather?units=metric&q=bangalore&appid=${apiKey}`;
-    
-        async function checkWeather() {
-            const response = await fetch(apiUrl);
-            const data = await response.json();
-    
-            console.log(data);
+        const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+
+        const searchBox = document.querySelector(".search input");
+        const searchBtn = document.querySelector(".search button");
+        const weatherIcon = document.querySelector(".weather-icon");
+
+        async function checkWeather(city) {
+            try {
+                const response = await fetch(`${apiUrl}${city}&appid=${apiKey}`);
+                if (!response.ok) throw new Error("Cidade não encontrada");
+
+                const data = await response.json();
+                document.querySelector(".city").textContent = data.name;
+                document.querySelector(".temp").textContent = `${Math.round(data.main.temp)}°C`;
+                document.querySelector(".humidity").textContent = `${data.main.humidity}%`;
+                document.querySelector(".wind").textContent = `${data.wind.speed} km/h`;
+
+                const weatherConditions = {
+                    Clouds: "images/clouds.png",
+                    Clear: "images/clear.png",
+                    Rain: "images/rain.png",
+                    Drizzle: "images/drizzle.png",
+                    Mist: "images/mist.png",
+                };
+
+                weatherIcon.src = weatherConditions[data.weather[0].main] || "images/default.png";
+                
+                // Limpar a caixa de busca após a pesquisa
+                searchBox.value = "";
+            } catch (error) {
+                console.error("Erro:", error);
+                alert("Cidade não encontrada. Por favor, tente novamente.");
+            }
         }
-    
-        checkWeather();
+
+        function handleSearch() {
+            const city = searchBox.value.trim();
+            if (city) checkWeather(city);
+        }
+
+        searchBtn.addEventListener("click", handleSearch);
+
+        // Adiciona o evento de tecla "Enter" para iniciar a busca
+        searchBox.addEventListener("keypress", (event) => {
+            if (event.key === "Enter") {
+                handleSearch();
+            }
+        });
     </script>
-    
 </body>
 </html>
